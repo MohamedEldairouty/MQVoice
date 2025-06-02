@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MQVoice LED Control</title>
+  <link rel="icon" type="image/png" href="mqvoice-logo-white.png"/>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --button-bg: #1f1f1f;
+      --button-color: #ffffff;
+      --accent: #00C8FF;
+      --shadow: rgba(0, 0, 0, 0.4);
+      --logo-src: url('mqvoice-logo-white.png');
+    }
+
+    body.light {
+      --bg-color: #f5f5f5;
+      --text-color: #121212;
+      --button-bg: #ffffff;
+      --button-color: #000000;
+      --accent: #0047AB;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --logo-src: url('mqvoice-logo-dark.png');
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg-color) url('https://www.transparenttextures.com/patterns/stardust.png');
+      color: var(--text-color);
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      transition: background-color 0.4s, color 0.4s;
+    }
+
+    #theme-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--accent);
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      background-image: var(--logo-src);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin: 0.2em 0;
+    }
+
+    h3 {
+      margin-top: 0;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    .btn {
+      font-size: 1rem;
+      margin: 10px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--button-bg);
+      color: var(--button-color);
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .btn:hover {
+      opacity: 0.95;
+      transform: scale(1.02);
+    }
+
+    #status {
+      margin-top: 25px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      .btn {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+        font-size: 1.1rem;
+      }
+      .logo {
+        width: 70px;
+        height: 70px;
+      }
+      #theme-toggle {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" onclick="toggleTheme()">🌞</button>
+
+  <div class="logo"></div>
+  <h1>MQVoice</h1>
+  <h3>Voice + Web-Controlled LED</h3>
+
+  <button class="btn" onclick="sendCommand('on')">🔆 Turn LED ON</button>
+  <button class="btn" onclick="sendCommand('off')">💤 Turn LED OFF</button>
+  <button class="btn" onclick="startListening()">🎙️ Listen</button>
+
+  <div id="status">Ready</div>
+
+  <script>
+    const baseUrl = "/led"; 
+
+    function sendCommand(state) {
+      fetch(`${baseUrl}?state=${state}`)
+        .then(res => res.text())
+        .then(msg => {
+          document.getElementById('status').innerText = msg;
+        })
+        .catch(err => {
+          document.getElementById('status').innerText = "❌ Error sending command";
+          console.error(err);
+        });
+    }
+
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+      document.getElementById('status').innerText = '🎤 Listening...';
+
+      recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript.toLowerCase();
+        console.log("🗣️ Heard:", text);
+        if (text.includes("on")) sendCommand('on');
+        else if (text.includes("off")) sendCommand('off');
+        else document.getElementById('status').innerText = "❓ Unrecognized command";
+      };
+
+      recognition.onerror = function() {
+        document.getElementById('status').innerText = "❌ Voice error. Try again.";
+      };
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById('theme-toggle');
+      body.classList.toggle('light');
+
+      icon.textContent = body.classList.contains('light') ? '🌙' : '🌞';
+
+      // Update logo
+      document.querySelector('.logo').style.backgroundImage =
+        getComputedStyle(body).getPropertyValue('--logo-src');
+    }
+
+    window.onload = () => {
+      document.body.classList.remove('light');
+      document.querySelector('.logo').style.backgroundImage =
+        getComputedStyle(document.body).getPropertyValue('--logo-src');
+    };
+  </script>
+</body>
+</html>
