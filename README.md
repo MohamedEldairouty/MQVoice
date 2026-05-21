@@ -159,7 +159,7 @@ cd MQVoice
 | Name                           | Registration No. |
 |--------------------------------|------------------|
 | [@Mohamed Abdallah Eldairouty](https://github.com/MohamedEldairouty) | 221001719 |
-| [@Rimas Emad](https://github.com/rimaseldib)                        | 221001067 |
+| [@Rimas Emad](https://github.com/rimas1470-collab)                        | 221001067 |
 | Moaz Aly                                                           | 221001970 |
 
 ---
